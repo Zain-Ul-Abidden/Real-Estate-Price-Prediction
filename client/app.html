@@ -1,53 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Banglore Home Price Prediction</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="app.js"></script>
-	<link rel="stylesheet" href="app.css">
+  <title>Bangalore Home Price Predictor</title>
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js"></script>
 </head>
+
 <body>
-<div class="img"></div>
-<form class="form">
-	<h2>Area (Square Feet)</h2>
-    <input class="area"  type="text" id="uiSqft" class="floatLabel" name="Squareft" value="1000">
-	<h2>BHK</h2>
-	<div class="switch-field">
-		<input type="radio" id="radio-bhk-1" name="uiBHK" value="1"/>
-		<label for="radio-bhk-1">1</label>
-		<input type="radio" id="radio-bhk-2" name="uiBHK" value="2" checked/>
-		<label for="radio-bhk-2">2</label>
-		<input type="radio" id="radio-bhk-3" name="uiBHK" value="3"/>
-		<label for="radio-bhk-3">3</label>
-		<input type="radio" id="radio-bhk-4" name="uiBHK" value="4"/>
-		<label for="radio-bhk-4">4</label>
-		<input type="radio" id="radio-bhk-5" name="uiBHK" value="5"/>
-		<label for="radio-bhk-5">5</label>
-	</div>
-	</form>
-<form class="form">
-	<h2>Bath</h2>
-	<div class="switch-field">
-		<input type="radio" id="radio-bath-1" name="uiBathrooms" value="1"/>
-		<label for="radio-bath-1">1</label>
-		<input type="radio" id="radio-bath-2" name="uiBathrooms" value="2" checked/>
-		<label for="radio-bath-2">2</label>
-		<input type="radio" id="radio-bath-3" name="uiBathrooms" value="3"/>
-		<label for="radio-bath-3">3</label>
-		<input type="radio" id="radio-bath-4" name="uiBathrooms" value="4"/>
-		<label for="radio-bath-4">4</label>
-		<input type="radio" id="radio-bath-5" name="uiBathrooms" value="5"/>
-		<label for="radio-bath-5">5</label>
-	</div>
-		<h2>Location</h2>
-	<div>
-  <select class="location" name="" id="uiLocations">
-    <option value="" disabled="disabled" selected="selected">Choose a Location</option>
-		<option>Electronic City</option>
-        <option>Rajaji Nagar</option>
-  </select>
-</div>
-	<button class="submit" onclick="onClickedEstimatePrice()" type="button">Estimate Price</button>
-	<div id="uiEstimatedPrice" class="result">	<h2></h2> </div>
+  <div class="img"></div>
+
+  <div class="container">
+    <div class="card">
+      <h1>🏠 Home Price Predictor</h1>
+      <p>Bangalore real estate price estimation</p>
+
+      <label>Area (sq ft)</label>
+      <input class="area" id="uiSqft" type="number" value="1000">
+
+      <label>BHK</label>
+      <div class="switch-field">
+        <input type="radio" id="bhk1" name="uiBHK" value="1">
+        <label for="bhk1">1</label>
+
+        <input type="radio" id="bhk2" name="uiBHK" value="2" checked>
+        <label for="bhk2">2</label>
+
+        <input type="radio" id="bhk3" name="uiBHK" value="3">
+        <label for="bhk3">3</label>
+      </div>
+
+      <label>Bathrooms</label>
+      <div class="switch-field">
+        <input type="radio" id="bath1" name="uiBathrooms" value="1">
+        <label for="bath1">1</label>
+
+        <input type="radio" id="bath2" name="uiBathrooms" value="2" checked>
+        <label for="bath2">2</label>
+
+        <input type="radio" id="bath3" name="uiBathrooms" value="3">
+        <label for="bath3">3</label>
+      </div>
+
+      <label>Location</label>
+      <select class="location" id="uiLocations"></select>
+
+      <button class="submit" onclick="onClickedEstimatePrice()">Estimate Price</button>
+
+      <div id="loader" class="loader hidden"></div>
+      <div id="uiEstimatedPrice" class="result hidden"></div>
+    </div>
+  </div>
 </body>
 </html>

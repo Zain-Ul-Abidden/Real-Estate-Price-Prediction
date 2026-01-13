@@ -1,12 +1,10 @@
-
 window.onload = onPageLoad;
 
-function getBathValue()  {
+function getBathValue() {
     let uiBathRooms = document.getElementsByName("uiBathrooms");
-    console.log(uiBathRooms);
-    for (var i in uiBathRooms) { 
-        if (uiBathRooms[i].checked) { 
-            return parseInt(i) + 1;
+    for (let i = 0; i < uiBathRooms.length; i++) {
+        if (uiBathRooms[i].checked) {
+            return parseInt(uiBathRooms[i].value);
         }
     }
     return -1;
@@ -14,50 +12,76 @@ function getBathValue()  {
 
 function getBHKValue() {
     let uiBHK = document.getElementsByName("uiBHK");
-    console.log(uiBHK);
-    for (var i in uiBHK) { 
-        if (uiBHK[i].checked) { 
-            return parseInt(i) + 1;
+    for (let i = 0; i < uiBHK.length; i++) {
+        if (uiBHK[i].checked) {
+            return parseInt(uiBHK[i].value);
         }
     }
     return -1;
 }
 
-function onClickedEstimatePrice()  { 
-    console.log("Estimate price button clicked");
+function onClickedEstimatePrice() {
     let sqft = document.getElementById("uiSqft").value;
     let bhk = getBHKValue();
     let bathrooms = getBathValue();
     let location = document.getElementById("uiLocations").value;
 
-    const url = "http://127.0.0.1:5000/predict_home_price" ; 
-    $.post (url, { 
-        total_sqft: parseFloat(sqft),
-        bhk: bhk,
-        bath: bathrooms,
-        location: location
-    }, function(data, status) { 
-        console.log(data);
-        document.getElementById("uiEstimatedPrice").innerHTML = "<h2>" + data.estimated_price.toString() + " Lakh</h2>";
-        console.log(status);
+    if (!location || bhk === -1 || bathrooms === -1 || !sqft) {
+        alert("Please fill all fields correctly");
+        return;
+    }
+
+    const loader = document.getElementById("loader");
+    const resultDiv = document.getElementById("uiEstimatedPrice");
+
+    resultDiv.classList.add("hidden");
+    loader.classList.remove("hidden");
+
+    fetch("http://127.0.0.1:8000/predict", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            total_sqft: parseFloat(sqft),
+            bhk: bhk,
+            bath: bathrooms,
+            location: location
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Prediction failed");
+        }
+        return response.json();
+    })
+    .then(data => {
+        loader.classList.add("hidden");
+        resultDiv.innerHTML = `₹ ${data.estimated_price} Lakh`;
+        resultDiv.classList.remove("hidden");
+    })
+    .catch(error => {
+        loader.classList.add("hidden");
+        alert("Error while fetching prediction");
+        console.error(error);
     });
 }
 
-function onPageLoad()  { 
-    console.log("document loaded");
-    const locationUrl = "http://127.0.0.1:5000/get_location_names" ;
-    $.get(locationUrl, (data , status) => {
-        console.log("got respponse");
-        if (data) { 
-            let locations = data.locations;
+function onPageLoad() {
+    fetch("http://127.0.0.1:8000/locations")
+        .then(response => response.json())
+        .then(data => {
             let uiLocation = document.getElementById("uiLocations");
-            $("#uiLocations").empty();
-            for (var  i in locations) { 
-                let opt = new Option(locations[i]);
-                $("#uiLocations").append(opt);
+            uiLocation.innerHTML = "";
 
-            }
-        }
-
-    }) ;
+            data.locations.forEach(location => {
+                let opt = document.createElement("option");
+                opt.value = location;
+                opt.text = location;
+                uiLocation.appendChild(opt);
+            });
+        })
+        .catch(error => {
+            console.error("Error loading locations:", error);
+        });
 }

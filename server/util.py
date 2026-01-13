@@ -1,53 +1,44 @@
 import json
 import pickle
 import numpy as np
+import pandas as pd
+import os
 
-locations = None
-data_columns = None
-model = None
+class PricePredictionService:
+    def __init__(self):
+        self.model = None
+        self.data_columns = None
+        self.locations = None
+        self.column_lookup = None  # NEW
 
-# getting locations
-def get_location_names () :
-    return locations 
+    def load_artifacts(self):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        artifacts_dir = os.path.join(base_dir, "artifacts")
 
-# gettinv estimated price
-def get_estimated_price (location ,sqft, bath , bhk ) : 
-         
-    try : 
-        loc_index = data_columns.index (location.lower())    
-    except : 
-        loc_index = -1
-         
-    x = np.zeros (len(data_columns)) 
-    x[0] = sqft 
-    x[1] = bath 
-    x[2] = bhk 
-    
-    if loc_index >= 0 : 
-        x[loc_index] = 1
-    
-    return round(model.predict([x])[0], 2)
+        with open(os.path.join(artifacts_dir, "columns.json"), "r") as f:
+            self.data_columns = json.load(f)["data_columns"]
 
-# load saved artifacts
-def load_saved_artifacts () : 
-    print("loading artficts......")
-    
-    global locations
-    global data_columns
-    global model
+        # Build lowercase → original column name map
+        self.column_lookup = {col.lower(): col for col in self.data_columns}
 
-    with open ("server/artifacts/columns.json", "r") as file : 
-       data_columns =  json.load(file)["data_columns"]
-       locations = data_columns[3:]
+        self.locations = self.data_columns[3:]
 
-    with open("server/artifacts/real_state_price_prediction.pickle", "rb") as file : 
-       model =  pickle.load(file)
-    print("Artifacts Loaded Done")
-         
-    
-# main class 
-if __name__ == "__main__" : 
-    load_saved_artifacts ()
-    print(get_location_names())
-    print(get_estimated_price('1st phase jp nagar', 1000, 3,3))
-    print(get_estimated_price('1st phase jp nagar', 1000, 2,2))
+        with open(os.path.join(artifacts_dir, "real_state_price_prediction.pickle"), "rb") as f:
+            self.model = pickle.load(f)
+
+    def predict_price(self, location, sqft, bhk, bath):
+        x = np.zeros(len(self.data_columns))
+
+        x[0] = sqft
+        x[1] = bath
+        x[2] = bhk
+
+        # CASE-INSENSITIVE MATCHING (SAFE)
+        loc_key = location.lower()
+        if loc_key in self.column_lookup:
+            col_name = self.column_lookup[loc_key]
+            idx = self.data_columns.index(col_name)
+            x[idx] = 1
+
+        x_df = pd.DataFrame([x], columns=self.data_columns)
+        return round(self.model.predict(x_df)[0], 2)
